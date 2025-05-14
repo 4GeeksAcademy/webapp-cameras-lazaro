@@ -1,3 +1,152 @@
-* {
-  color: white !important;
+/* Registros.css */
+
+.content-container {
+  padding: 8px;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.content-container h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Contenedor con scroll para la tabla */
+.table-container {
+  max-height: calc(100vh - 12vh);
+  overflow-y: auto;
+  width: 100%;
+}
+
+.registros-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.registros-table thead {
+  background: #f0f0f0;
+}
+
+.registros-table th,
+.registros-table td {
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  color: #444;
+  border-bottom: 1px solid #eee;
+}
+
+.registros-table th {
+  font-weight: 600;
+  color: #222;
+  text-align: left;
+}
+
+/* Filas clicables */
+.registros-table tbody tr.clickable-row,
+.registros-table tbody tr.clickable-row td {
+  cursor: pointer;
+}
+
+.registros-table tbody tr.clickable-row:hover {
+  background: #e6f7ff;
+}
+
+.registros-table tbody tr:nth-child(odd) {
+  background: #f9f9f9;
+}
+
+.registros-table tbody tr:nth-child(even) {
+  background: #fff;
+}
+
+.registros-table img.thumb {
+  display: block;
+  max-width: 100px;
+  border-radius: 4px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 6px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  padding: 16px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: #444;
+}
+
+.modal-body {
+  display: flex;
+  gap: 16px;
+}
+
+.modal-image img {
+  max-width: 200px;
+  border-radius: 4px;
+}
+
+.no-image {
+  width: 200px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  color: #888;
+  border-radius: 4px;
+}
+
+.modal-details {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.modal-details h3 {
+  grid-column: 1 / -1;
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.modal-details div {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.modal-details strong {
+  color: #222;
 }

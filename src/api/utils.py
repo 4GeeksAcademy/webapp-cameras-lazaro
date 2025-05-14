@@ -1,6 +1,6 @@
 # src/api/utils.py
 
-from flask import jsonify
+from flask import jsonify, url_for
 from flask_jwt_extended import get_jwt, verify_jwt_in_request
 from functools import wraps
 

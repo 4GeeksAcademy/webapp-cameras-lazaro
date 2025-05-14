@@ -1,6 +1,5 @@
 // src/api/streamer.js
 
-// Para cargarnos el .env que está en la raíz del proyecto, subimos dos niveles
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
@@ -8,7 +7,6 @@ const WebSocket = require("ws");
 const { Pool } = require("pg");
 const { spawn } = require("child_process");
 
-// Ahora DATABASE_URL se lee correctamente desde /workspaces/webapp-cameras-lazaro/.env
 const dbUrl = process.env.DATABASE_URL;
 if (!dbUrl) {
   console.error("⚠️  Missing DATABASE_URL environment variable");
@@ -35,6 +33,7 @@ wss.on("connection", async (ws, req) => {
       ws.close(1008, "Cámara no encontrada");
       return;
     }
+
     const { username, password, ip_address } = res.rows[0];
     const rtspUrl = `rtsp://${username}:${password}@${ip_address}/axis-media/media.amp`;
     console.log(`▶️ Conectando cámara ${cameraId}: ${rtspUrl}`);
@@ -55,13 +54,30 @@ wss.on("connection", async (ws, req) => {
       "-",
     ]);
 
-    ffmpeg.stdout.on("data", (chunk) => ws.send(chunk));
-    ffmpeg.stderr.on("data", (data) =>
-      console.error(`FFmpeg [${cameraId}]:`, data.toString())
-    );
-    ffmpeg.on("close", (code) =>
-      console.log(`❌ FFmpeg cámara ${cameraId} finalizado con código ${code}`)
-    );
+    ffmpeg.stdout.on("data", (chunk) => {
+      if (ws.readyState === WebSocket.OPEN) ws.send(chunk);
+    });
+
+    ffmpeg.stderr.on("data", (data) => {
+      console.error(`FFmpeg [${cameraId}]:`, data.toString());
+    });
+
+    ffmpeg.on("close", (code) => {
+      console.log(`❌ FFmpeg cámara ${cameraId} finalizado con código ${code}`);
+      // Esperar un poco para asegurar que el mensaje llegue
+      setTimeout(() => {
+        if (code !== 0 && ws.readyState === WebSocket.OPEN) {
+          ws.send(
+            JSON.stringify({
+              error: `FFmpeg exited with code ${code}`,
+              cameraId,
+            })
+          );
+          ws.close(1011, "FFmpeg error");
+        }
+      }, 300); // Esperamos 300ms antes de cerrar el socket
+    });
+
     ws.on("close", () => ffmpeg.kill("SIGKILL"));
   } catch (err) {
     console.error("Error interno streamer:", err);

@@ -1,0 +1,69 @@
+/* RegistrosMenu.css */
+
+.registros-menu {
+  padding: 8px;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.registros-menu .menu-title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.registros-menu form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.registros-menu .filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.registros-menu .filter-row label {
+  flex: 1 1 calc(50% - 4px);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: #222;
+}
+
+.registros-menu .filter-input {
+  margin-top: 4px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.registros-menu select.filter-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path fill='%23666' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.registros-menu .search-btn {
+  align-self: flex-start;
+  padding: 6px 12px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.registros-menu .search-btn:hover {
+  background: #0056b3;
+}

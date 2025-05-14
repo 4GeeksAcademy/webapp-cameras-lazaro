@@ -15,6 +15,7 @@ import L from 'leaflet';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+import JSMpeg from '@cycjimmy/jsmpeg-player';
 L.Icon.Default.mergeOptions({
   iconRetinaUrl,
   iconUrl,

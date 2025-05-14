@@ -9,6 +9,19 @@ export default function Ajustes1() {
   const [cameras, setCameras] = useState([]);
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const [newCamera, setNewCamera] = useState({
+    name: "",
+    municipio: "",
+    ip_address: "",
+    username: "",
+    password: "",
+    connection_method: "rtsp",
+    location_lat: "",
+    location_lng: "",
+    is_active: true,
+  });
+
   const user = getUser();
 
   const handleAuthError = () => {
@@ -17,7 +30,6 @@ export default function Ajustes1() {
     window.location.href = "/login";
   };
 
-  // Carga inicial de cámaras
   useEffect(() => {
     fetch(`${API_URL}/api/cameras`, {
       headers: {
@@ -45,7 +57,7 @@ export default function Ajustes1() {
       ip_address: cam.ip_address,
       username: cam.username || "",
       password: cam.password || "",
-      connection_method: cam.connection_method,
+      connection_method: "rtsp",
       location_lat: cam.location?.lat || "",
       location_lng: cam.location?.lng || "",
       is_active: cam.is_active,
@@ -56,9 +68,7 @@ export default function Ajustes1() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      ...(name === "is_active"
-        ? { [name]: value === "true" }
-        : { [name]: value }),
+      ...(name === "is_active" ? { [name]: value === "true" } : { [name]: value }),
     }));
   };
 
@@ -77,11 +87,8 @@ export default function Ajustes1() {
         return res.json();
       })
       .then((updated) => {
-        // updated: { message, camera }
         const newCam = updated.camera;
-        setCameras((prev) =>
-          prev.map((c) => (c.id === id ? newCam : c))
-        );
+        setCameras((prev) => prev.map((c) => (c.id === id ? newCam : c)));
         setEditId(null);
         alert("Cámara actualizada correctamente");
       })
@@ -112,25 +119,27 @@ export default function Ajustes1() {
       });
   };
 
-  const handleAddCamera = () => {
-    const newCam = {
-      name: "",
-      municipio: "",
-      ip_address: "",
-      username: "",
-      password: "",
-      connection_method: "mjpeg",
-      location_lat: "",
-      location_lng: "",
-      is_active: true,
-    };
+  const handleAddCamera = () => setShowModal(true);
+
+  const handleNewCameraChange = (e) => {
+    const { name, value } = e.target;
+    setNewCamera((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreateCamera = () => {
+    const values = Object.values(newCamera);
+    if (values.some(val => val === "")) {
+      alert("Todos los campos son obligatorios");
+      return;
+    }
+
     fetch(`${API_URL}/api/cameras`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...getAuthHeader(),
       },
-      body: JSON.stringify(newCam),
+      body: JSON.stringify(newCamera),
     })
       .then(async (res) => {
         if (res.status === 401) { handleAuthError(); return; }
@@ -138,9 +147,9 @@ export default function Ajustes1() {
         return res.json();
       })
       .then((created) => {
-        // created: { message, camera }
         const cam = created.camera;
         setCameras((prev) => [...prev, cam]);
+        setShowModal(false);
         alert("Cámara añadida correctamente");
       })
       .catch((err) => {
@@ -161,158 +170,95 @@ export default function Ajustes1() {
           )}
         </div>
 
-        <table className="ajustes-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Municipio</th>        {/* Nueva columna */}
-              <th>IP</th>
-              <th>Usuario</th>
-              <th>Contraseña</th>
-              <th>Método</th>
-              <th>Lat</th>
-              <th>Lng</th>
-              <th>Activo</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cameras.map((cam) => (
-              <tr key={cam.id}>
-                {/* ID siempre lectura */}
-                <td>{cam.id}</td>
-
-                {editId === cam.id ? (
-                  <>
-                    <td>
-                      <input
-                        className="input-field"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        className="input-field"
-                        name="municipio"
-                        value={formData.municipio}
-                        onChange={handleInputChange}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        className="input-field"
-                        name="ip_address"
-                        value={formData.ip_address}
-                        onChange={handleInputChange}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        className="input-field"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleInputChange}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        className="input-field"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                      />
-                    </td>
-                    <td>
-                      <select
-                        className="input-field"
-                        name="connection_method"
-                        value={formData.connection_method}
-                        onChange={handleInputChange}
-                      >
-                        <option value="mjpeg">MJPEG</option>
-                        <option value="rtsp">RTSP</option>
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        className="input-field"
-                        name="location_lat"
-                        value={formData.location_lat}
-                        onChange={handleInputChange}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        className="input-field"
-                        name="location_lng"
-                        value={formData.location_lng}
-                        onChange={handleInputChange}
-                      />
-                    </td>
-                    <td>
-                      <select
-                        className="input-field"
-                        name="is_active"
-                        value={formData.is_active}
-                        onChange={handleInputChange}
-                      >
-                        <option value="true">Sí</option>
-                        <option value="false">No</option>
-                      </select>
-                    </td>
-                    <td>
-                      <button
-                        className="button-save"
-                        onClick={() => handleSave(cam.id)}
-                      >
-                        💾
-                      </button>
-                      <button
-                        className="button-cancel"
-                        onClick={() => setEditId(null)}
-                      >
-                        ✖
-                      </button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td>{cam.name}</td>
-                    <td>{cam.municipio}</td>
-                    <td>{cam.ip_address}</td>
-                    <td>{cam.username}</td>
-                    <td>{cam.password}</td>
-                    <td>{cam.connection_method}</td>
-                    <td>{cam.location?.lat}</td>
-                    <td>{cam.location?.lng}</td>
-                    <td>{cam.is_active ? "Sí" : "No"}</td>
-                    <td>
-                      {user?.role === "admin" && (
-                        <>
-                          <button
-                            className="button-edit"
-                            onClick={() => handleEditClick(cam)}
-                          >
-                            ✏
-                          </button>
-                          <button
-                            className="button-delete"
-                            onClick={() => handleDelete(cam.id)}
-                          >
-                            🗑
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </>
-                )}
+        <div className="table-container">
+          <table className="ajustes-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Municipio</th>
+                <th>IP</th>
+                <th>Usuario</th>
+                <th>Contraseña</th>
+                <th>Método</th>
+                <th>Lat</th>
+                <th>Lng</th>
+                <th>Activo</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {cameras.map((cam) => (
+                <tr key={cam.id}>
+                  <td>{cam.id}</td>
+                  {editId === cam.id ? (
+                    <>
+                      <td><input className="input-field" name="name" value={formData.name} onChange={handleInputChange} /></td>
+                      <td><input className="input-field" name="municipio" value={formData.municipio} onChange={handleInputChange} /></td>
+                      <td><input className="input-field" name="ip_address" value={formData.ip_address} onChange={handleInputChange} /></td>
+                      <td><input className="input-field" name="username" value={formData.username} onChange={handleInputChange} /></td>
+                      <td><input className="input-field" name="password" value={formData.password} onChange={handleInputChange} /></td>
+                      <td>RTSP</td>
+                      <td><input className="input-field" name="location_lat" value={formData.location_lat} onChange={handleInputChange} /></td>
+                      <td><input className="input-field" name="location_lng" value={formData.location_lng} onChange={handleInputChange} /></td>
+                      <td>
+                        <select className="input-field" name="is_active" value={formData.is_active} onChange={handleInputChange}>
+                          <option value="true">Sí</option>
+                          <option value="false">No</option>
+                        </select>
+                      </td>
+                      <td>
+                        <button className="button-save" onClick={() => handleSave(cam.id)}>💾</button>
+                        <button className="button-cancel" onClick={() => setEditId(null)}>✖</button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td>{cam.name}</td>
+                      <td>{cam.municipio}</td>
+                      <td>{cam.ip_address}</td>
+                      <td>{cam.username}</td>
+                      <td>{cam.password}</td>
+                      <td>{cam.connection_method}</td>
+                      <td>{cam.location?.lat}</td>
+                      <td>{cam.location?.lng}</td>
+                      <td>{cam.is_active ? "Sí" : "No"}</td>
+                      <td>
+                        {user?.role === "admin" && (
+                          <>
+                            <button className="button-edit" onClick={() => handleEditClick(cam)}>✏</button>
+                            <button className="button-delete" onClick={() => handleDelete(cam.id)}>🗑</button>
+                          </>
+                        )}
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {showModal && (
+          <div className="modal-backdrop" onClick={() => setShowModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Crear nueva cámara</h3>
+              <form>
+                <input className="input-field" name="name" placeholder="Nombre" onChange={handleNewCameraChange} />
+                <input className="input-field" name="municipio" placeholder="Municipio" onChange={handleNewCameraChange} />
+                <input className="input-field" name="ip_address" placeholder="IP" onChange={handleNewCameraChange} />
+                <input className="input-field" name="username" placeholder="Usuario" onChange={handleNewCameraChange} />
+                <input className="input-field" name="password" placeholder="Contraseña" onChange={handleNewCameraChange} />
+                <input className="input-field" name="location_lat" placeholder="Latitud" onChange={handleNewCameraChange} />
+                <input className="input-field" name="location_lng" placeholder="Longitud" onChange={handleNewCameraChange} />
+              </form>
+              <div className="modal-buttons">
+                <button className="save-btn" onClick={handleCreateCamera}>Guardar</button>
+                <button className="cancel-btn" onClick={() => setShowModal(false)}>Cancelar</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

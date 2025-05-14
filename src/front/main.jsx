@@ -106,6 +106,7 @@ function Main() {
                     <VideoWall
                       layout={videoLayout}
                       selectedCameras={selectedCameras}
+                      setSelectedCameras={setSelectedCameras}
                       activeBoxIndex={activeBoxIndex}
                       setActiveBoxIndex={setActiveBoxIndex}
                     />

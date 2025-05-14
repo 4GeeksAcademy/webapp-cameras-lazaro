@@ -1,0 +1,11 @@
+backend
+
+pipenv run start
+
+frontend
+
+npm run start
+
+streamings
+cd src/api/
+node streamer.js

@@ -1,0 +1,37 @@
+/* AjustesMenu.css */
+
+.ajustes-menu {
+  padding: 8px;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ajustes-menu .menu-title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.ajustes-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ajustes-link {
+  text-decoration: none;
+  color: #444;
+  background: #f0f0f0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.ajustes-link:hover {
+  background: #e0e0e0;
+  color: #222;
+}

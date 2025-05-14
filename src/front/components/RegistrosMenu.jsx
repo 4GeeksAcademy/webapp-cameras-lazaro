@@ -1,7 +1,6 @@
-// src/components/RegistrosMenu.jsx
 import React, { useState, useEffect } from 'react';
 import { getAuthHeader } from '../utils/auth';
-// import '../assets/RegistrosMenu.css';
+import '../assets/RegistrosMenu.css';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -40,9 +39,7 @@ export default function RegistrosMenu({ setFilters }) {
         if (!res.ok) throw new Error(await res.text());
         return res.json();
       })
-      .then(data => {
-        setCamaras(Array.isArray(data) ? data : []);
-      })
+      .then(data => setCamaras(Array.isArray(data) ? data : []))
       .catch(err => {
         console.error('❌ Error al cargar cámaras:', err);
         alert('Error al cargar cámaras. Revisa la consola.');
@@ -61,12 +58,13 @@ export default function RegistrosMenu({ setFilters }) {
 
   return (
     <div className="registros-menu">
-      <h3>Filtros</h3>
+      <h3 className="menu-title">Filtros</h3>
       <form onSubmit={handleSubmit}>
         <div className="filter-row">
           <label>
-            Fecha inicio:
+            Fecha inicio
             <input
+              className="filter-input"
               type="date"
               name="startDate"
               value={localFilters.startDate}
@@ -74,8 +72,9 @@ export default function RegistrosMenu({ setFilters }) {
             />
           </label>
           <label>
-            Hora inicio:
+            Hora inicio
             <input
+              className="filter-input"
               type="time"
               name="startTime"
               value={localFilters.startTime}
@@ -83,10 +82,12 @@ export default function RegistrosMenu({ setFilters }) {
             />
           </label>
         </div>
+
         <div className="filter-row">
           <label>
-            Fecha fin:
+            Fecha fin
             <input
+              className="filter-input"
               type="date"
               name="endDate"
               value={localFilters.endDate}
@@ -94,8 +95,9 @@ export default function RegistrosMenu({ setFilters }) {
             />
           </label>
           <label>
-            Hora fin:
+            Hora fin
             <input
+              className="filter-input"
               type="time"
               name="endTime"
               value={localFilters.endTime}
@@ -103,10 +105,12 @@ export default function RegistrosMenu({ setFilters }) {
             />
           </label>
         </div>
+
         <div className="filter-row">
           <label>
-            Cámara:
+            Cámara
             <select
+              className="filter-input"
               name="cameraId"
               value={localFilters.cameraId}
               onChange={handleChange}
@@ -120,10 +124,12 @@ export default function RegistrosMenu({ setFilters }) {
             </select>
           </label>
         </div>
+
         <div className="filter-row">
           <label>
-            Matrícula:
+            Matrícula
             <input
+              className="filter-input"
               type="text"
               name="plate"
               placeholder="Ej: 1234ABC"
@@ -132,10 +138,12 @@ export default function RegistrosMenu({ setFilters }) {
             />
           </label>
         </div>
+
         <div className="filter-row">
           <label>
-            Tipo de vehículo:
+            Tipo de vehículo
             <input
+              className="filter-input"
               type="text"
               name="vehicleType"
               placeholder="Ej: Car"
@@ -144,10 +152,12 @@ export default function RegistrosMenu({ setFilters }) {
             />
           </label>
         </div>
+
         <div className="filter-row">
           <label>
-            Marca:
+            Marca
             <input
+              className="filter-input"
               type="text"
               name="vehicleMake"
               placeholder="Ej: Mercedes"
@@ -156,10 +166,12 @@ export default function RegistrosMenu({ setFilters }) {
             />
           </label>
         </div>
+
         <div className="filter-row">
           <label>
-            Modelo:
+            Modelo
             <input
+              className="filter-input"
               type="text"
               name="vehicleModel"
               placeholder="Ej: A Class"
@@ -168,7 +180,8 @@ export default function RegistrosMenu({ setFilters }) {
             />
           </label>
         </div>
-        <button type="submit" className="button-search">
+
+        <button type="submit" className="search-btn">
           Buscar
         </button>
       </form>
