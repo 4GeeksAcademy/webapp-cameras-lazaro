@@ -1,82 +1,96 @@
-// frontend/src/pages/Registros.jsx
+// src/pages/Registros.jsx
 import React, { useEffect, useState } from 'react';
 import { getAuthHeader } from '../utils/auth';
+import '../assets/Registros.css';
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-function Registros({ filters }) {
+export default function Registros({ filters }) {
   const [records, setRecords] = useState([]);
 
   useEffect(() => {
-    fetch('/api/alpr-records', {
-      headers: getAuthHeader(),
+    // Construye la URL con filtros si los hay
+    const params = new URLSearchParams();
+    if (filters) {
+      if (filters.plate) params.append('plate', filters.plate);
+      if (filters.cameraId) params.append('camera', filters.cameraId);
+      if (filters.vehicleType) params.append('vehicleType', filters.vehicleType);
+      if (filters.vehicleMake) params.append('vehicleMake', filters.vehicleMake);
+      if (filters.vehicleModel) params.append('vehicleModel', filters.vehicleModel);
+      if (filters.startDate) {
+        params.append('startDate', filters.startDate);
+        if (filters.startTime) params.append('startTime', filters.startTime);
+      }
+      if (filters.endDate) {
+        params.append('endDate', filters.endDate);
+        if (filters.endTime) params.append('endTime', filters.endTime);
+      }
+    }
+    const url = `${API_URL}/api/alpr-records${params.toString() ? `?${params}` : ''}`;
+
+    fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
     })
-      .then(response => response.json())
-      .then(data => setRecords(data))
-      .catch(err => console.error('Error al cargar registros:', err));
-  }, []);
-
-  const applyFilters = (record) => {
-    if (!filters) return true;
-    const matchesPlate = filters.plate ? record.plate_number.includes(filters.plate) : true;
-    const matchesCamera = filters.cameraId ? record.camera_name === filters.cameraId : true;
-    const matchesType = filters.vehicleType ? record.vehicle_type === filters.vehicleType : true;
-    const matchesMake = filters.vehicleMake ? record.vehicle_make === filters.vehicleMake : true;
-    const matchesModel = filters.vehicleModel ? record.vehicle_model === filters.vehicleModel : true;
-    const matchesStartDate = filters.startDate ? new Date(record.detected_at) >= new Date(filters.startDate) : true;
-    const matchesEndDate = filters.endDate ? new Date(record.detected_at) <= new Date(filters.endDate) : true;
-
-    return (
-      matchesPlate &&
-      matchesCamera &&
-      matchesType &&
-      matchesMake &&
-      matchesModel &&
-      matchesStartDate &&
-      matchesEndDate
-    );
-  };
+      .then(async res => {
+        if (res.status === 401) {
+          // Token expirado o no autorizado
+          alert('Sesión caducada. Redirigiendo al login.');
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          return;
+        }
+        if (res.status === 502) {
+          throw new Error('Servidor temporalmente no disponible (502).');
+        }
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(`Error ${res.status}: ${txt}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        setRecords(Array.isArray(data) ? data : []);
+      })
+      .catch(err => {
+        console.error('Error al cargar registros:', err);
+        alert(`No se pudieron cargar los registros:\n${err.message}`);
+      });
+  }, [filters]);
 
   return (
     <div className="content-container">
       <h2>Registros ALPR</h2>
-      <table border="1" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
+      <table className="registros-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Cámara</th>
-            <th>Matrícula</th>
-            <th>Fecha</th>
-            <th>Confianza</th>
-            <th>Color</th>
-            <th>Tipo</th>
-            <th>Modelo</th>
-            <th>Marca</th>
-            <th>Dirección</th>
-            <th>Imagen</th>
+            <th>ID</th><th>Cámara</th><th>Matrícula</th><th>Fecha</th>
+            <th>Confianza</th><th>Color</th><th>Tipo</th><th>Modelo</th>
+            <th>Marca</th><th>Dirección</th><th>Imagen</th>
           </tr>
         </thead>
         <tbody>
-          {records.filter(applyFilters).map(record => (
-            <tr key={record.id}>
-              <td>{record.id}</td>
-              <td>{record.camera_name}</td>
-              <td>{record.plate_number}</td>
-              <td>{record.detected_at}</td>
-              <td>{record.confidence}%</td>
-              <td>{record.vehicle_color}</td>
-              <td>{record.vehicle_type}</td>
-              <td>{record.vehicle_model}</td>
-              <td>{record.vehicle_make}</td>
-              <td>{record.direction}</td>
+          {records.map(r => (
+            <tr key={r.id}>
+              <td>{r.id}</td>
+              <td>{r.camera_name}</td>
+              <td>{r.plate_number}</td>
+              <td>{r.detected_at}</td>
+              <td>{r.confidence}%</td>
+              <td>{r.vehicle_color}</td>
+              <td>{r.vehicle_type}</td>
+              <td>{r.vehicle_model}</td>
+              <td>{r.vehicle_make}</td>
+              <td>{r.direction}</td>
               <td>
-                {record.image_url ? (
-                  <img
-                    src={`data:image/jpeg;base64,${record.image_url}`}
+                {r.image_url
+                  ? <img
+                    src={`data:image/jpeg;base64,${r.image_url}`}
                     alt="captura"
-                    style={{ width: '100px' }}
+                    style={{ width: 100 }}
                   />
-                ) : (
-                  'Sin imagen'
-                )}
+                  : 'Sin imagen'}
               </td>
             </tr>
           ))}
@@ -85,5 +99,3 @@ function Registros({ filters }) {
     </div>
   );
 }
-
-export default Registros;

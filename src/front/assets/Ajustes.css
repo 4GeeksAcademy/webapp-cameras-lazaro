@@ -1,0 +1,99 @@
+/* src/assets/Ajustes.css */
+*{
+    color: black !important;
+}
+.ajustes-container {
+  padding: 1rem;
+  background-color: #fafafa;
+}
+
+.ajustes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.button-add {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.button-add:hover {
+  background-color: #1565c0;
+}
+
+.ajustes-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.ajustes-table th,
+.ajustes-table td {
+  padding: 0.75rem;
+  text-align: left;
+}
+.ajustes-table th {
+  background-color: #1976d2;
+  color: white;
+}
+.ajustes-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+.ajustes-table tr:hover {
+  background-color: #e3f2fd;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button-edit,
+.button-delete,
+.button-save,
+.button-cancel {
+  border: none;
+  padding: 0.4rem 0.6rem;
+  margin: 0 0.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-edit {
+  background-color: #ffb300;
+  color: white;
+}
+.button-edit:hover {
+  background-color: #ffa000;
+}
+
+.button-delete {
+  background-color: #e53935;
+  color: white;
+}
+.button-delete:hover {
+  background-color: #d32f2f;
+}
+
+.button-save {
+  background-color: #43a047;
+  color: white;
+}
+.button-save:hover {
+  background-color: #388e3c;
+}
+
+.button-cancel {
+  background-color: #9e9e9e;
+  color: white;
+}
+.button-cancel:hover {
+  background-color: #757575;
+}

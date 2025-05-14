@@ -22,7 +22,6 @@ import Mapa from "./pages/Mapa.jsx";
 import Register from "./pages/Register.jsx";
 import Registros from "./pages/Registros.jsx";
 import VideoWall from "./pages/VideoWall.jsx";
-import leafletIconFix from "./leafletIconFix.jsx";
 
 
 

@@ -1,15 +1,24 @@
-// ✅ Volvemos a incluir fetch sin token, backend debe aceptar peticiones públicas
-import React, { useEffect, useRef, useState } from 'react';
+// src/pages/VideoWall.jsx
+import React, { useEffect, useRef } from 'react';
 import JSMpeg from '@cycjimmy/jsmpeg-player';
 import '../assets/VideoWall.css';
 
-function VideoWall({ layout, selectedCameras }) {
+function VideoWall({
+  layout,
+  selectedCameras,
+  activeBoxIndex,
+  setActiveBoxIndex
+}) {
   const containerRefs = useRef({});
   const playersRef = useRef({});
   const count = parseInt(layout, 10);
 
   useEffect(() => {
-    const activeIds = selectedCameras.slice(0, count).map(c => c.id);
+    // Solo cámaras definidas (evitamos huecos undefined)
+    const camsToShow = selectedCameras.slice(0, count).filter(cam => cam);
+    const activeIds = camsToShow.map(c => c.id);
+
+    // Destruir reproductores que ya no están
     Object.keys(playersRef.current).forEach(id => {
       if (!activeIds.includes(Number(id))) {
         playersRef.current[id].destroy();
@@ -17,9 +26,9 @@ function VideoWall({ layout, selectedCameras }) {
       }
     });
 
-    selectedCameras.slice(0, count).forEach(cam => {
+    // Crear nuevos reproductores
+    camsToShow.forEach(cam => {
       if (playersRef.current[cam.id]) return;
-
       const container = containerRefs.current[cam.id];
       if (!container) return;
 
@@ -36,48 +45,54 @@ function VideoWall({ layout, selectedCameras }) {
     });
 
     return () => {
+      // Limpieza al desmontar / cambiar cámara/layout
       Object.values(playersRef.current).forEach(p => p.destroy());
       playersRef.current = {};
     };
   }, [layout, selectedCameras]);
 
+  // Clase CSS según el número de vídeos
   let boxClass = '';
   if (layout === '1') boxClass = 'videoBox1';
   else if (layout === '4') boxClass = 'videoBox4';
   else if (layout === '9') boxClass = 'videoBox9';
 
-  const boxes = [];
-  for (let i = 0; i < count; i++) {
-    const cam = selectedCameras[i];
-    boxes.push(
-      <div key={i} className={boxClass}>
-        {cam ? (
-          <div
-            ref={el => {
-              if (el) containerRefs.current[cam.id] = el;
-            }}
-            style={{ width: '100%', height: '100%' }}
-          />
-        ) : (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#222',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white'
-          }}>
-            Sin cámara
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="content-container">
-      {boxes}
+      {Array.from({ length: count }).map((_, i) => {
+        const cam = selectedCameras[i];
+        const isActive = i === activeBoxIndex;
+        return (
+          <div
+            key={i}
+            className={`${boxClass} ${isActive ? 'selected-box' : ''}`}
+            onClick={() => setActiveBoxIndex(i)}
+          >
+            {cam ? (
+              <div
+                ref={el => {
+                  if (el) containerRefs.current[cam.id] = el;
+                }}
+                style={{ width: '100%', height: '100%' }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#222',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white'
+                }}
+              >
+                Sin cámara
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

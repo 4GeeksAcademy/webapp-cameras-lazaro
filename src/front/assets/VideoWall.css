@@ -29,3 +29,7 @@
     height: 33%;
     border: 1px solid white;
 }
+
+.selected-box {
+  outline: 3px solid #4caf50; /* resalta la caja activa */
+}

@@ -48,7 +48,7 @@ class ALPRRecord(db.Model):
     camera_id = db.Column(db.Integer, db.ForeignKey('cameras.id'))
     plate_number = db.Column(db.String(20))
     detected_at = db.Column(db.DateTime)
-    image_url = db.Column(db.String(255))
+    image_url = db.Column(db.Text)
     country = db.Column(db.String(10))
     confidence = db.Column(db.Numeric(5, 2))
     left_pos = db.Column(db.Integer)
