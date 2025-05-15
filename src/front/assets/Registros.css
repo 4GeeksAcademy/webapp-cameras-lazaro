@@ -1,10 +1,15 @@
-/* Registros.css */
-
-.content-container {
+.content-container-r {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  width: 90%;
+  height: 92vh;
+  margin-left: 10%;
+  margin-top: 8vh;
   padding: 8px;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  overflow-y: auto;
   background: #ffffff;
-  width: 100%;
+  font-family: "Segoe UI", Tahoma, sans-serif;
   box-sizing: border-box;
 }
 
@@ -73,30 +78,36 @@
   border-radius: 4px;
 }
 
-.modal-backdrop {
+/* ========== MODAL ========== */
+/* ========== MODALES REGISTROS ========== */
+
+.regmodal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 1000;
+  backdrop-filter: blur(1px);
 }
 
-.modal-content {
-  background: #fff;
+.regmodal-content {
+  background: #ffffff;
   border-radius: 6px;
-  width: 80%;
-  max-width: 600px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 620px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   position: relative;
-  padding: 16px;
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  box-sizing: border-box;
 }
 
-.modal-close {
+.regmodal-close {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -104,63 +115,281 @@
   border: none;
   font-size: 1.25rem;
   cursor: pointer;
-  color: #444;
+  color: #555;
+  transition: color 0.2s ease;
 }
 
-.modal-body {
+.regmodal-close:hover {
+  color: #000;
+}
+
+.regmodal-body {
   display: flex;
+  flex-direction: row;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
-.modal-image img {
-  max-width: 200px;
-  border-radius: 4px;
-}
-
-.no-image {
+.regmodal-image img,
+.regmodal-no-image {
   width: 200px;
-  height: 150px;
+  height: auto;
+  border-radius: 4px;
+  object-fit: contain;
+  background: #f9f9f9;
+  display: block;
+}
+
+.regmodal-no-image {
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f0f0f0;
   color: #888;
-  border-radius: 4px;
+  font-size: 0.9rem;
+  text-align: center;
+  height: 150px;
 }
 
-.modal-details {
+.regmodal-details {
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.modal-details h3 {
-  grid-column: 1 / -1;
-  margin: 0 0 8px;
-  font-size: 1rem;
-  color: #333;
-}
-
-.modal-details div {
+  gap: 10px;
   font-size: 0.9rem;
   color: #444;
 }
 
-.modal-details strong {
-  color: #222;
+.regmodal-details h3 {
+  grid-column: 1 / -1;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
 }
 
-.modal-columns-container {
+.regmodal-details strong {
+  color: #222;
+  font-weight: 600;
+}
+
+/* ========== MODAL DE COLUMNAS ========== */
+.regmodal-columns-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem 1rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem 1.5rem;
+  margin: 1rem 0;
 }
 
-.modal-columns-container label {
+.regmodal-columns-container label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: #333;
+  user-select: none;
+}
+
+.regmodal-columns-container input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #007bff;
+  cursor: pointer;
+}
+
+/* Botón igual que .search-btn */
+.regmodal-content .search-btn {
+  width: 100%;
+  padding: 6px 12px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+  text-align: center;
+}
+
+.regmodal-content .search-btn:hover {
+  background: #0056b3;
+}
+
+/* MODAL DETALLE - Tamaño grande y diseño horizontal */
+.regmodal-large {
+  width: 75%;
+  max-width: none;
+}
+
+.regmodal-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: #333;
+  text-align: left;
+  padding-right: 2rem;
+}
+
+.regmodal-body-horizontal {
+  display: flex;
+  gap: 24px;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.regmodal-image-large {
+  flex: 0 0 60%;
+  background: #f9f9f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.regmodal-image-large img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+}
+
+.regmodal-details {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #444;
+  padding-top: 4px;
+}
+
+.regmodal-detail-item strong {
+  color: #222;
+  font-weight: 600;
+}
+
+
+/* MODAL DETALLE EXPANDIDO */
+
+.regmodal-large {
+  width: 75%;
+  max-width: none;
+}
+
+.regmodal-title.centered {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin: 0 0 20px;
+}
+
+.regmodal-body-horizontal {
+  display: flex;
+  gap: 24px;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.regmodal-image-large {
+  flex: 0 0 60%;
+  background: #f9f9f9;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.regmodal-image-large img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+
+.regmodal-details.reorganized {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 16px;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.regmodal-plate {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.regmodal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.regmodal-row div {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.regmodal-row strong {
+  color: #222;
+  font-weight: 600;
+}
+
+
+/* ========== PAGINACIÓN ========== */
+.pagination-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.pagination-left label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagination-left select {
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.pagination-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-right button {
+  padding: 4px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pagination-right button:hover {
+  background-color: #0056b3;
+}
+
+.pagination-right input[type="number"] {
+  padding: 4px;
+  width: 50px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
 }

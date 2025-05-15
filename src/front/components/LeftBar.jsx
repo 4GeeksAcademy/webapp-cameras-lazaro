@@ -5,6 +5,7 @@ import '../assets/LeftBar.css';
 import VideoWallMenu from './VideoWallMenu';
 import AjustesMenu from './AjustesMenu';
 import RegistrosMenu from './RegistrosMenu';
+import MapaMenu from '../components/MapaMenu.jsx';
 
 function LeftBar({
   setVideoLayout,
@@ -28,10 +29,7 @@ function LeftBar({
       )}
 
       {location.pathname === '/mapa' && (
-        <div className="leftbar-content">
-          <h2>Mapa</h2>
-          <p>Aquí irá el menú del Mapa.</p>
-        </div>
+        <MapaMenu />
       )}
 
       {location.pathname === '/registros' && (

@@ -9,6 +9,8 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 export default function Registros({ filters }) {
   const [records, setRecords] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [recordsPerPage, setRecordsPerPage] = useState(50);
 
   const {
     showColumnModal,
@@ -71,12 +73,19 @@ export default function Registros({ filters }) {
         });
 
         setRecords(enriched);
+        setCurrentPage(1);
       })
       .catch(err => {
         console.error('Error al cargar registros:', err);
         alert(`No se pudieron cargar los registros:\n${err.message}`);
       });
   }, [filters, queryCamera]);
+
+  const totalPages = Math.ceil(records.length / recordsPerPage);
+  const paginatedRecords = records.slice(
+    (currentPage - 1) * recordsPerPage,
+    currentPage * recordsPerPage
+  );
 
   const handleRowClick = record => {
     fetch(`${API_URL}/api/alpr-records/${record.id}`, {
@@ -91,7 +100,7 @@ export default function Registros({ filters }) {
   };
 
   return (
-    <div className="content-container">
+    <div className="content-container-r">
       <h2>Registros ALPR</h2>
 
       <div className="table-container">
@@ -112,7 +121,7 @@ export default function Registros({ filters }) {
             </tr>
           </thead>
           <tbody>
-            {records.map(r => (
+            {paginatedRecords.map(r => (
               <tr key={r.id} className="clickable-row" onClick={() => handleRowClick(r)}>
                 {columnVisibility.id && <td>{r.id}</td>}
                 {columnVisibility.plate_number && <td>{r.plate_number}</td>}
@@ -149,39 +158,83 @@ export default function Registros({ filters }) {
         </table>
       </div>
 
+      {/* PAGINACIÓN */}
+      <div className="pagination-container">
+        <div className="pagination-left">
+          <label>
+            Registros por página:{' '}
+            <select
+              value={recordsPerPage}
+              onChange={e => {
+                setRecordsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              {[10, 20, 50, 100].map(num => (
+                <option key={num} value={num}>{num}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="pagination-right">
+          {currentPage > 1 && (
+            <button onClick={() => setCurrentPage(prev => prev - 1)}>Anterior</button>
+          )}
+          <span>
+            <input
+              type="number"
+              value={currentPage}
+              min={1}
+              max={totalPages}
+              onChange={e => {
+                const val = Math.max(1, Math.min(totalPages, Number(e.target.value)));
+                setCurrentPage(val);
+              }}
+              style={{ width: '50px', textAlign: 'center' }}
+            /> / {totalPages}
+          </span>
+          {currentPage < totalPages && (
+            <button onClick={() => setCurrentPage(prev => prev + 1)}>Siguiente</button>
+          )}
+        </div>
+      </div>
+
+      {/* MODAL DETALLE */}
+
       {selectedRecord && (
-        <div className="modal-backdrop" onClick={() => setSelectedRecord(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedRecord(null)}>×</button>
-            <div className="modal-body">
-              <div className="modal-image">
+        <div className="regmodal-backdrop" onClick={() => setSelectedRecord(null)}>
+          <div className="regmodal-content regmodal-large" onClick={e => e.stopPropagation()}>
+            <button className="regmodal-close" onClick={() => setSelectedRecord(null)}>×</button>
+            <h3 className="regmodal-title centered">Detalles del Registro</h3>
+            <div className="regmodal-body-horizontal">
+              <div className="regmodal-image-large">
                 {selectedRecord.image_url ? (
                   <img
                     src={`data:image/jpeg;base64,${selectedRecord.image_url}`}
                     alt="captura"
                   />
                 ) : (
-                  <div className="no-image">Sin imagen</div>
+                  <div className="regmodal-no-image">Sin imagen</div>
                 )}
               </div>
-              <div className="modal-details">
-                <h3>Detalle Registro</h3>
-                {[['ID', selectedRecord.id],
-                ['Cámara', selectedRecord.camera_name],
-                ['Municipio', selectedRecord.municipio || '-'],
-                ['Matrícula', selectedRecord.plate_number],
-                ['Fecha', selectedRecord.detected_at],
-                ['Confianza', `${selectedRecord.confidence}%`],
-                ['Color', selectedRecord.vehicle_color],
-                ['Tipo', selectedRecord.vehicle_type],
-                ['Modelo', selectedRecord.vehicle_model],
-                ['Marca', selectedRecord.vehicle_make],
-                ['Dirección', selectedRecord.direction === 1 ? 'Acercándose' : selectedRecord.direction === 2 ? 'Alejándose' : 'Desconocido'],
-                ].map(([label, value]) => (
-                  <div key={label}>
-                    <strong>{label}:</strong> {value}
-                  </div>
-                ))}
+              <div className="regmodal-details reorganized">
+                <div className="regmodal-plate">{selectedRecord.plate_number}</div>
+                <div className="regmodal-row">
+                  <div><strong>Municipio:</strong> {selectedRecord.municipio || '-'}</div>
+                  <div><strong>Cámara:</strong> {selectedRecord.camera_name}</div>
+                </div>
+                <div className="regmodal-row">
+                  <div><strong>Fecha:</strong> {selectedRecord.detected_at}</div>
+                  <div><strong>ID:</strong> {selectedRecord.id}</div>
+                </div>
+                <div className="regmodal-row">
+                  <div><strong>Marca:</strong> {selectedRecord.vehicle_make}</div>
+                  <div><strong>Modelo:</strong> {selectedRecord.vehicle_model}</div>
+                </div>
+                <div className="regmodal-row">
+                  <div><strong>Color:</strong> {selectedRecord.vehicle_color}</div>
+                  <div><strong>Tipo:</strong> {selectedRecord.vehicle_type}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -189,32 +242,47 @@ export default function Registros({ filters }) {
       )}
 
       {showColumnModal && (
-        <div className="modal-backdrop" onClick={() => setShowColumnModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="regmodal-backdrop" onClick={() => setShowColumnModal(false)}>
+          <div className="regmodal-content" onClick={e => e.stopPropagation()}>
             <h3>Mostrar/Ocultar Columnas</h3>
-            <div className="modal-columns-container">
-              {Object.keys(columnVisibility).map(col => (
-                <label key={col}>
-                  <input
-                    type="checkbox"
-                    checked={columnVisibility[col]}
-                    onChange={() =>
-                      setColumnVisibility(prev => ({
-                        ...prev,
-                        [col]: !prev[col]
-                      }))
-                    }
-                  />
-                  {col
-                    .replace(/_/g, ' ')
-                    .replace(/\b\w/g, l => l.toUpperCase())}
-                </label>
-              ))}
+            <div className="regmodal-columns-container">
+              {Object.keys(columnVisibility).map(col => {
+                const traducciones = {
+                  id: 'ID',
+                  plate_number: 'Matrícula',
+                  municipio: 'Municipio',
+                  camera_name: 'Cámara',
+                  vehicle_make: 'Marca',
+                  vehicle_model: 'Modelo',
+                  vehicle_color: 'Color',
+                  direction: 'Dirección',
+                  detected_at: 'Fecha',
+                  confidence: 'Confianza',
+                  image_url: 'Imagen'
+                };
+                return (
+                  <label key={col}>
+                    <input
+                      type="checkbox"
+                      checked={columnVisibility[col]}
+                      onChange={() =>
+                        setColumnVisibility(prev => ({
+                          ...prev,
+                          [col]: !prev[col]
+                        }))
+                      }
+                    />
+                    {traducciones[col] || col}
+                  </label>
+                );
+              })}
             </div>
             <button className="search-btn" onClick={() => setShowColumnModal(false)}>Cerrar</button>
           </div>
         </div>
       )}
+
+
     </div>
   );
 }

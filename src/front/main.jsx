@@ -1,9 +1,9 @@
-// src/main.jsx
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { StoreProvider } from './hooks/useGlobalReducer';
-import { ColumnModalProvider } from './components/ColumnModalContext.jsx'; // ✅ importa el nuevo contexto
+import { ColumnModalProvider } from './components/ColumnModalContext.jsx';
+import { MapaProvider } from './components/MapaContext.jsx'; // ✅ NUEVO
 import { BackendURL } from './components/BackendURL';
 import Header from './components/Header';
 import LeftBar from './components/LeftBar';
@@ -81,75 +81,77 @@ function Main() {
   return (
     <React.StrictMode>
       <StoreProvider>
-        <ColumnModalProvider> {/* ✅ envolver aquí toda la app */}
-          <Router>
-            <LayoutWrapper
-              setVideoLayout={setVideoLayout}
-              setSelectedCameras={setSelectedCameras}
-              activeBoxIndex={activeBoxIndex}
-              setActiveBoxIndex={setActiveBoxIndex}
-              filters={filters}
-              setFilters={setFilters}
-            >
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route
-                  path="/register"
-                  element={
-                    <PrivateRoute>
-                      <Register />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/"
-                  element={
-                    <PrivateRoute>
-                      <VideoWall
-                        layout={videoLayout}
-                        selectedCameras={selectedCameras}
-                        setSelectedCameras={setSelectedCameras}
-                        activeBoxIndex={activeBoxIndex}
-                        setActiveBoxIndex={setActiveBoxIndex}
-                      />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/mapa"
-                  element={
-                    <PrivateRoute>
-                      <Mapa />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/registros"
-                  element={
-                    <PrivateRoute>
-                      <Registros filters={filters} />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/ajustes"
-                  element={
-                    <PrivateRoute>
-                      <Ajustes />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/ajustes1"
-                  element={
-                    <PrivateRoute>
-                      <Ajustes1 />
-                    </PrivateRoute>
-                  }
-                />
-              </Routes>
-            </LayoutWrapper>
-          </Router>
+        <ColumnModalProvider>
+          <MapaProvider> {/* ✅ Envuelve aquí */}
+            <Router>
+              <LayoutWrapper
+                setVideoLayout={setVideoLayout}
+                setSelectedCameras={setSelectedCameras}
+                activeBoxIndex={activeBoxIndex}
+                setActiveBoxIndex={setActiveBoxIndex}
+                filters={filters}
+                setFilters={setFilters}
+              >
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route
+                    path="/register"
+                    element={
+                      <PrivateRoute>
+                        <Register />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/"
+                    element={
+                      <PrivateRoute>
+                        <VideoWall
+                          layout={videoLayout}
+                          selectedCameras={selectedCameras}
+                          setSelectedCameras={setSelectedCameras}
+                          activeBoxIndex={activeBoxIndex}
+                          setActiveBoxIndex={setActiveBoxIndex}
+                        />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/mapa"
+                    element={
+                      <PrivateRoute>
+                        <Mapa />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/registros"
+                    element={
+                      <PrivateRoute>
+                        <Registros filters={filters} />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/ajustes"
+                    element={
+                      <PrivateRoute>
+                        <Ajustes />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/ajustes1"
+                    element={
+                      <PrivateRoute>
+                        <Ajustes1 />
+                      </PrivateRoute>
+                    }
+                  />
+                </Routes>
+              </LayoutWrapper>
+            </Router>
+          </MapaProvider>
         </ColumnModalProvider>
       </StoreProvider>
     </React.StrictMode>

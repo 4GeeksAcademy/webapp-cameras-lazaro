@@ -115,7 +115,7 @@ export default function RegistrosMenu({ setFilters }) {
             <input className="filter-input" type="text" name="plate" placeholder="Ej: 1234ABC" value={localFilters.plate} onChange={handleChange} />
           </label>
           <label>
-            Tipo de vehículo
+            Vehículo
             <input className="filter-input" type="text" name="vehicleType" placeholder="Ej: Car" value={localFilters.vehicleType} onChange={handleChange} />
           </label>
         </div>
@@ -135,8 +135,8 @@ export default function RegistrosMenu({ setFilters }) {
       </form>
 
       <div className="column-toggle">
-        <button className="search-btn" onClick={() => setShowColumnModal(true)}>
-          Mostrar columnas
+        <button className="search-btn2" onClick={() => setShowColumnModal(true)}>
+          Opciones
         </button>
       </div>
     </div>
