@@ -1,13 +1,30 @@
 // src/pages/Login.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveUser } from '../utils/auth';
+import '../assets/Login.css';
+
+import logo from '../assets/img/Logo.png';
+import checkpoint from '../assets/img/checkpoint.png';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
+    script.onload = () => {
+      if (window.particlesJS) {
+        window.particlesJS.load('particles-js', '/particles.json', function () {
+          console.log('Particles.js loaded');
+        });
+      }
+    };
+    document.body.appendChild(script);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +48,6 @@ function Login() {
         saveUser(data.user);
         navigate('/ajustes');
       } else {
-        // para debug, aquí podrías leer el body de error:
         const err = await res.json().catch(() => null);
         console.warn('Login fallido:', err);
         alert('Credenciales inválidas');
@@ -43,29 +59,34 @@ function Login() {
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h2>Iniciar Sesión</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Usuario"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <br />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <br />
-        <button type="submit">Entrar</button>
-      </form>
+    <div className="login-page-wrapper">
+      <div id="particles-js" className="login-background" />
+      <div className="login-container">
+        <div className="login-logo">
+          <img src={logo} alt="Logo" className="logo-img" />
+          <img src={checkpoint} alt="Checkpoint" className="checkpoint-img" />
+        </div>
+        <form onSubmit={handleSubmit} className="login-form">
+          <input
+            type="text"
+            placeholder="Usuario"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit">Entrar</button>
+        </form>
+      </div>
     </div>
   );
+
 }
 
 export default Login;

@@ -20,7 +20,7 @@ function Header() {
 
     return (
         <header className="header-container">
-            <nav className="header-nav">
+            <div className="header-nav">
                 {menuItems.map(item => (
                     <Link
                         key={item.path}
@@ -30,13 +30,13 @@ function Header() {
                         {item.label}
                     </Link>
                 ))}
-                <button
-                    onClick={handleLogout}
-                    className="header-menu-item logout-btn"
-                >
-                    Cerrar sesión
-                </button>
-            </nav>
+            </div>
+            <button
+                onClick={handleLogout}
+                className="logout-btn"
+            >
+                Cerrar sesión
+            </button>
         </header>
     );
 }
