@@ -1,5 +1,5 @@
 // src/pages/Mapa.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -8,25 +8,19 @@ import {
   useMap
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import '../assets/Map.css'; // Asegúrate de que este fichero dé al .content-container altura:100%
-
-// Fix para los iconos de Leaflet sin tener que cargar URLs externas
+import '../assets/Map.css';
 import L from 'leaflet';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 import JSMpeg from '@cycjimmy/jsmpeg-player';
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl,
-  iconUrl,
-  shadowUrl
-});
+import { useNavigate } from 'react-router-dom';
 
-// Componente interno para forzar invalidateSize() tras el render
+L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
+
 function ResizeMap() {
   const map = useMap();
   useEffect(() => {
-    // Esperamos un tick para que el contenedor tenga su tamaño final
     setTimeout(() => {
       map.invalidateSize();
     }, 0);
@@ -57,7 +51,6 @@ export default function Mapa() {
           const data = await res.json();
           setCamaras(Array.isArray(data) ? data : []);
         } else if (res.status === 401) {
-          // Token inválido o expirado
           localStorage.removeItem('token');
           window.location.href = '/login';
         } else {
@@ -95,23 +88,23 @@ export default function Mapa() {
             if (isNaN(lat) || isNaN(lng)) return null;
             return (
               <Marker key={cam.id} position={[lat, lng]}>
-                <Popup minWidth={300}>
+                <Popup minWidth={300} maxWidth={300} closeButton={true}>
                   <PopupContent camara={cam} />
                 </Popup>
               </Marker>
             );
           })
-          : <p style={{ padding: '1rem' }}>
-            No hay cámaras disponibles o hubo un error.
-          </p>}
+          : <p style={{ padding: '1rem' }}>No hay cámaras disponibles o hubo un error.</p>}
       </MapContainer>
     </div>
   );
 }
 
 function PopupContent({ camara }) {
-  const videoRef = React.useRef();
-  const playerRef = React.useRef();
+  const videoRef = useRef();
+  const playerRef = useRef();
+  const [ultimoRegistro, setUltimoRegistro] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -138,18 +131,41 @@ function PopupContent({ camara }) {
     };
   }, [camara.id]);
 
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_BACKEND_URL;
+    fetch(`${API_URL}/api/alpr-records?camera=${encodeURIComponent(camara.name)}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setUltimoRegistro(data[0]);
+        }
+      })
+      .catch(err => console.error('Error obteniendo último registro:', err));
+  }, [camara.name]);
+
+  const handleVerMas = () => {
+    navigate('/registros', { state: { filterCamera: camara.name } });
+  };
+
   return (
-    <div style={{ textAlign: 'center' }}>
-      <h3>{camara.name}</h3>
-      <div
-        ref={videoRef}
-        style={{
-          width: '280px',
-          height: '180px',
-          backgroundColor: '#000',
-          marginTop: '10px'
-        }}
-      />
+    <div className="popup-card">
+      <h3 className="popup-title">{camara.name}</h3>
+      <div ref={videoRef} className="popup-video" />
+      {ultimoRegistro ? (
+        <div className="popup-latest">
+          <div><strong>Matrícula:</strong> {ultimoRegistro.plate_number}</div>
+          <div><strong>Marca:</strong> {ultimoRegistro.vehicle_make}</div>
+          <div><strong>Modelo:</strong> {ultimoRegistro.vehicle_model}</div>
+        </div>
+      ) : (
+        <div className="popup-latest">No hay registros disponibles</div>
+      )}
+      <button className="popup-button" onClick={handleVerMas}>Ver más registros</button>
     </div>
   );
 }

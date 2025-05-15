@@ -150,3 +150,17 @@
 .modal-details strong {
   color: #222;
 }
+
+.modal-columns-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-columns-container label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
