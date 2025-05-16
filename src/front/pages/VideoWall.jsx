@@ -36,7 +36,7 @@ function VideoWall({
       const isCodespaces = window.location.hostname.includes('app.github.dev');
       const wsHost = isCodespaces
         ? window.location.hostname.replace('-3000.', '-9999.')
-        : `${window.location.hostname}:9999`;
+        : `https://ubiquitous-engine-wrgj6rv55g762gp6w.github.dev:9999`;
 
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       const wsUrl = `${protocol}://${wsHost}/stream/${cam.id}`;
