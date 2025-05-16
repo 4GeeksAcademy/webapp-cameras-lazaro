@@ -9,4 +9,4 @@ pipenv install
 
 pipenv run upgrade
 
-node ./src/api/streamer.js
+

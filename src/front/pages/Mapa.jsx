@@ -307,15 +307,7 @@ function PopupContent({ camara }) {
         )}
         <div ref={videoRef} className="video-feed" />
       </div>
-      {ultimoRegistro ? (
-        <div className="popup-latest">
-          <div><strong>Matrícula:</strong> {ultimoRegistro.plate_number}</div>
-          <div><strong>Marca:</strong> {ultimoRegistro.vehicle_make}</div>
-          <div><strong>Modelo:</strong> {ultimoRegistro.vehicle_model}</div>
-        </div>
-      ) : (
-        <div className="popup-latest">No hay registros disponibles</div>
-      )}
+      
       <button className="popup-button" onClick={handleVerMas}>Ver más registros</button>
     </div>
   );
