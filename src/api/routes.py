@@ -66,6 +66,9 @@ def get_alpr():
     end_date = request.args.get('endDate')
     end_time = request.args.get('endTime')
 
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 50))
+
     if plate:
         query = query.filter(ALPRRecord.plate_number.ilike(f"%{plate}%"))
     if camera_name:
@@ -89,8 +92,10 @@ def get_alpr():
     except ValueError:
         return jsonify({"error": "Formato de fecha/hora inválido. Usa YYYY-MM-DD para fecha y HH:MM para hora."}), 400
 
+    total = query.count()
+
     query = query.order_by(ALPRRecord.detected_at.desc())
-    records = query.all()
+    records = query.offset((page - 1) * limit).limit(limit).all()
 
     result = []
     for record, camera in records:
@@ -108,7 +113,14 @@ def get_alpr():
             'vehicle_make': record.vehicle_make,
             'country': record.country
         })
-    return jsonify(result)
+
+    return jsonify({
+        'total': total,
+        'page': page,
+        'limit': limit,
+        'records': result
+    })
+
 
 
 @api.route('/alpr-records/<int:record_id>', methods=['GET'])

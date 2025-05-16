@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { getAuthHeader } from '../utils/auth';
 import { useLocation } from 'react-router-dom';
 import { useColumnModal } from '../components/ColumnModalContext.jsx';
@@ -11,6 +11,8 @@ export default function Registros({ filters }) {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [recordsPerPage, setRecordsPerPage] = useState(50);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const imageCache = useRef({});
 
   const {
     showColumnModal,
@@ -23,33 +25,38 @@ export default function Registros({ filters }) {
   const queryCamera = location.state?.filterCamera;
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    const activeFilters = filters || {};
-    const effectiveCamera = activeFilters.cameraId || queryCamera;
+    const fetchRecords = async () => {
+      const params = new URLSearchParams();
+      const activeFilters = filters || {};
+      const effectiveCamera = activeFilters.cameraId || queryCamera;
 
-    if (activeFilters.plate) params.append('plate', activeFilters.plate);
-    if (effectiveCamera) params.append('camera', effectiveCamera);
-    if (activeFilters.vehicleType) params.append('vehicleType', activeFilters.vehicleType);
-    if (activeFilters.vehicleMake) params.append('vehicleMake', activeFilters.vehicleMake);
-    if (activeFilters.vehicleModel) params.append('vehicleModel', activeFilters.vehicleModel);
-    if (activeFilters.startDate) {
-      params.append('startDate', activeFilters.startDate);
-      if (activeFilters.startTime) params.append('startTime', activeFilters.startTime);
-    }
-    if (activeFilters.endDate) {
-      params.append('endDate', activeFilters.endDate);
-      if (activeFilters.endTime) params.append('endTime', activeFilters.endTime);
-    }
+      if (activeFilters.plate) params.append('plate', activeFilters.plate);
+      if (effectiveCamera) params.append('camera', effectiveCamera);
+      if (activeFilters.vehicleType) params.append('vehicleType', activeFilters.vehicleType);
+      if (activeFilters.vehicleMake) params.append('vehicleMake', activeFilters.vehicleMake);
+      if (activeFilters.vehicleModel) params.append('vehicleModel', activeFilters.vehicleModel);
+      if (activeFilters.startDate) {
+        params.append('startDate', activeFilters.startDate);
+        if (activeFilters.startTime) params.append('startTime', activeFilters.startTime);
+      }
+      if (activeFilters.endDate) {
+        params.append('endDate', activeFilters.endDate);
+        if (activeFilters.endTime) params.append('endTime', activeFilters.endTime);
+      }
 
-    const url = `${API_URL}/api/alpr-records${params.toString() ? `?${params}` : ''}`;
+      params.append('page', currentPage);
+      params.append('limit', recordsPerPage);
 
-    fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeader(),
-      },
-    })
-      .then(async res => {
+      const url = `${API_URL}/api/alpr-records?${params.toString()}`;
+
+      try {
+        const res = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+        });
+
         if (res.status === 401) {
           alert('Sesión caducada. Redirigiendo al login.');
           localStorage.removeItem('token');
@@ -58,36 +65,41 @@ export default function Registros({ filters }) {
         }
         if (res.status === 502) throw new Error('Servidor temporalmente no disponible (502).');
         if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
-        return res.json();
-      })
-      .then(async data => {
-        if (!Array.isArray(data)) return setRecords([]);
+
+        const data = await res.json();
         const allCamerasRes = await fetch(`${API_URL}/api/cameras`, {
           headers: { 'Content-Type': 'application/json', ...getAuthHeader() }
         });
         const allCameras = await allCamerasRes.json();
 
-        const enriched = data.map(r => {
+        const enriched = data.records.map(r => {
           const matchedCamera = allCameras.find(cam => cam.id === r.camera_id);
-          return { ...r, municipio: matchedCamera?.municipio || '-' };
+          return {
+            ...r,
+            direction: parseInt(r.direction),
+            municipio: matchedCamera?.municipio || '-'
+          };
         });
 
         setRecords(enriched);
-        setCurrentPage(1);
-      })
-      .catch(err => {
+        setTotalRecords(data.total);
+      } catch (err) {
         console.error('Error al cargar registros:', err);
         alert(`No se pudieron cargar los registros:\n${err.message}`);
-      });
-  }, [filters, queryCamera]);
+      }
+    };
 
-  const totalPages = Math.ceil(records.length / recordsPerPage);
-  const paginatedRecords = records.slice(
-    (currentPage - 1) * recordsPerPage,
-    currentPage * recordsPerPage
-  );
+    fetchRecords();
+  }, [filters, queryCamera, currentPage, recordsPerPage]);
+
+  const totalPages = Math.ceil(totalRecords / recordsPerPage);
 
   const handleRowClick = record => {
+    if (imageCache.current[record.id]) {
+      setSelectedRecord({ ...record, image_url: imageCache.current[record.id] });
+      return;
+    }
+
     fetch(`${API_URL}/api/alpr-records/${record.id}`, {
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() }
     })
@@ -95,7 +107,10 @@ export default function Registros({ filters }) {
         if (!res.ok) throw new Error(`Error ${res.status}`);
         return res.json();
       })
-      .then(data => setSelectedRecord({ ...data, municipio: record.municipio }))
+      .then(data => {
+        imageCache.current[record.id] = data.image_url;
+        setSelectedRecord({ ...data, municipio: record.municipio });
+      })
       .catch(err => console.error('Error al cargar detalle:', err));
   };
 
@@ -118,10 +133,11 @@ export default function Registros({ filters }) {
               {columnVisibility.detected_at && <th>Fecha</th>}
               {columnVisibility.confidence && <th>Confianza</th>}
               {columnVisibility.image_url && <th>Imagen</th>}
+
             </tr>
           </thead>
           <tbody>
-            {paginatedRecords.map(r => (
+            {records.map(r => (
               <tr key={r.id} className="clickable-row" onClick={() => handleRowClick(r)}>
                 {columnVisibility.id && <td>{r.id}</td>}
                 {columnVisibility.plate_number && <td>{r.plate_number}</td>}
@@ -141,24 +157,13 @@ export default function Registros({ filters }) {
                 )}
                 {columnVisibility.detected_at && <td>{r.detected_at}</td>}
                 {columnVisibility.confidence && <td>{r.confidence}%</td>}
-                {columnVisibility.image_url && (
-                  <td>
-                    {r.image_url ? (
-                      <img
-                        src={`data:image/jpeg;base64,${r.image_url}`}
-                        alt="captura"
-                        className="thumb"
-                      />
-                    ) : 'Sin imagen'}
-                  </td>
-                )}
+                {columnVisibility.image_url && <td>(ver)</td>}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* PAGINACIÓN */}
       <div className="pagination-container">
         <div className="pagination-left">
           <label>
@@ -198,8 +203,6 @@ export default function Registros({ filters }) {
           )}
         </div>
       </div>
-
-      {/* MODAL DETALLE */}
 
       {selectedRecord && (
         <div className="regmodal-backdrop" onClick={() => setSelectedRecord(null)}>
@@ -281,8 +284,6 @@ export default function Registros({ filters }) {
           </div>
         </div>
       )}
-
-
     </div>
   );
 }
